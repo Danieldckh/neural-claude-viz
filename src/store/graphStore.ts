@@ -12,7 +12,7 @@ interface GraphState {
   connected: boolean;
 
   // Actions
-  addNode: (node: Omit<NeuralNode, 'x' | 'y' | 'vx' | 'vy' | 'radius' | 'color' | 'glowIntensity'> & { x?: number; y?: number }) => void;
+  addNode: (node: Omit<NeuralNode, 'x' | 'y' | 'vx' | 'vy' | 'radius' | 'color' | 'glowIntensity' | 'birthTime' | 'connectionCount'> & { x?: number; y?: number }) => void;
   updateNode: (id: string, updates: Partial<NeuralNode>) => void;
   addEdge: (edge: Omit<NeuralEdge, 'pulsePosition' | 'active' | 'createdAt'>) => void;
   addParticles: (newParticles: Particle[]) => void;
@@ -41,23 +41,42 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   addNode: (partial) => {
     const config = NODE_CONFIG[partial.type];
     const state = get();
-    // Position near parent or scatter from center
+    // Position to the RIGHT of parent for tree layout
     const parentNode = partial.parentAgentId
       ? state.nodes.find(n => n.id === partial.parentAgentId)
       : state.nodes[state.nodes.length - 1];
 
-    const angle = Math.random() * Math.PI * 2;
-    const dist = partial.parentAgentId ? 60 + Math.random() * 40 : 80 + Math.random() * 60;
+    let nx: number;
+    let ny: number;
+
+    if (partial.x != null && partial.y != null) {
+      nx = partial.x;
+      ny = partial.y;
+    } else if (parentNode) {
+      // Count how many children this parent already has (for vertical stagger)
+      const siblingCount = state.nodes.filter(
+        n => n.parentAgentId === (partial.parentAgentId ?? parentNode.id),
+      ).length;
+      // Place to the right, fan children vertically
+      nx = parentNode.x + 120;
+      ny = parentNode.y + (siblingCount - (siblingCount > 0 ? (siblingCount - 1) / 2 : 0)) * 50;
+    } else {
+      // First node or no parent — place near center, staggered by index
+      nx = state.nodes.length * 120;
+      ny = 0;
+    }
 
     const node: NeuralNode = {
       ...partial,
-      x: partial.x ?? (parentNode ? parentNode.x + Math.cos(angle) * dist : (Math.random() - 0.5) * 400),
-      y: partial.y ?? (parentNode ? parentNode.y + Math.sin(angle) * dist : (Math.random() - 0.5) * 400),
+      x: nx,
+      y: ny,
       vx: 0,
       vy: 0,
       radius: config.radius,
       color: config.color,
       glowIntensity: 1,
+      birthTime: performance.now(),
+      connectionCount: 0,
     };
 
     set(state => ({ nodes: [...state.nodes, node] }));
@@ -81,7 +100,15 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       createdAt: Date.now(),
     };
 
-    set(state => ({ edges: [...state.edges, edge] }));
+    set(state => ({
+      edges: [...state.edges, edge],
+      // Increment connectionCount on the source node
+      nodes: state.nodes.map(n =>
+        n.id === partial.sourceId
+          ? { ...n, connectionCount: n.connectionCount + 1 }
+          : n,
+      ),
+    }));
   },
 
   addParticles: (newParticles) => {

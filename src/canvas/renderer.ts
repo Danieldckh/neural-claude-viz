@@ -32,7 +32,7 @@ export function render(
   const cy = canvasHeight / 2;
   const gradRadius = Math.max(canvasWidth, canvasHeight) * 0.5;
   const ambientGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, gradRadius);
-  ambientGrad.addColorStop(0, 'rgba(15, 15, 40, 0.4)');
+  ambientGrad.addColorStop(0, 'rgba(10, 10, 30, 0.2)');
   ambientGrad.addColorStop(1, 'rgba(6, 6, 15, 0)');
   ctx.fillStyle = ambientGrad;
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);

@@ -14,6 +14,20 @@ function lightenColor(hex: string, percent: number): string {
 }
 
 /**
+ * Compute fade-in alpha: 0 → 1 over ~1 second from birthTime.
+ */
+function getFadeAlpha(node: NeuralNode): number {
+  return Math.min(1, (performance.now() - node.birthTime) / 1000);
+}
+
+/**
+ * Compute draw radius scaled by connectionCount (growth effect).
+ */
+function getGrowthRadius(baseRadius: number, connectionCount: number): number {
+  return baseRadius * (1 + connectionCount * 0.08);
+}
+
+/**
  * Draw soft radial glow behind each node.
  */
 export function drawNodeGlows(
@@ -23,17 +37,21 @@ export function drawNodeGlows(
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     const config = NODE_CONFIG[node.type];
+    const fadeAlpha = getFadeAlpha(node);
+    const growthScale = 1 + node.connectionCount * 0.08;
+    const glowR = config.glowRadius * growthScale;
+
     const grad = ctx.createRadialGradient(
       node.x, node.y, 0,
-      node.x, node.y, config.glowRadius,
+      node.x, node.y, glowR,
     );
-    const alpha = Math.max(0, Math.min(1, 0.4 * node.glowIntensity));
+    const alpha = Math.max(0, Math.min(1, 0.4 * node.glowIntensity)) * fadeAlpha;
     grad.addColorStop(0, colorWithAlpha(node.color, alpha));
     grad.addColorStop(1, colorWithAlpha(node.color, 0));
 
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, config.glowRadius, 0, Math.PI * 2);
+    ctx.arc(node.x, node.y, glowR, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -49,7 +67,12 @@ export function drawNodes(
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     const isSelected = node.id === selectedNodeId;
-    const drawRadius = isSelected ? node.radius * 1.2 : node.radius;
+    const fadeAlpha = getFadeAlpha(node);
+    const baseRadius = getGrowthRadius(node.radius, node.connectionCount);
+    const drawRadius = isSelected ? baseRadius * 1.2 : baseRadius;
+
+    ctx.save();
+    ctx.globalAlpha = fadeAlpha;
 
     // Selected: extra bright glow
     if (isSelected) {
@@ -72,7 +95,6 @@ export function drawNodes(
 
     // Agent type: dashed outer ring
     if (node.type === 'agent') {
-      ctx.save();
       ctx.strokeStyle = node.color;
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
@@ -80,12 +102,9 @@ export function drawNodes(
       ctx.arc(node.x, node.y, drawRadius + 6, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.restore();
     }
 
-    if (isSelected) {
-      ctx.shadowBlur = 0;
-    }
+    ctx.restore();
   }
 }
 
@@ -102,7 +121,8 @@ export function drawAgentRings(
     const node = nodes[i];
     if (node.type !== 'agent') continue;
 
-    ctx.globalAlpha = 0.08;
+    const fadeAlpha = getFadeAlpha(node);
+    ctx.globalAlpha = 0.08 * fadeAlpha;
     ctx.strokeStyle = node.color;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -115,6 +135,7 @@ export function drawAgentRings(
 
 /**
  * Update glow animation intensities based on node status.
+ * Slower, subtler pulse for a calmer aesthetic.
  */
 export function updateAnimations(nodes: NeuralNode[]): void {
   const now = performance.now();
@@ -122,9 +143,11 @@ export function updateAnimations(nodes: NeuralNode[]): void {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (node.status === 'active') {
-      node.glowIntensity = 0.5 + 0.5 * Math.sin(now * 0.004);
+      // Subtler, slower pulse
+      node.glowIntensity = 0.6 + 0.3 * Math.sin(now * 0.0015);
     } else if (node.status === 'completed') {
-      node.glowIntensity = 0.2 + 0.1 * Math.sin(now * 0.001);
+      // Barely breathing
+      node.glowIntensity = 0.3 + 0.05 * Math.sin(now * 0.0005);
     } else {
       // pending
       node.glowIntensity = 0.15;

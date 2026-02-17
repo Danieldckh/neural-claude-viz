@@ -42,3 +42,16 @@
 [2026-02-17 16:50:27] Optimized physics from O(n^3) to O(n^2+m) using nodeMap for edge and parent lookups
 [2026-02-17 16:50:29] Encapsulated physics frameCount in createPhysicsEngine closure to prevent global state issues
 [2026-02-17 16:50:30] Added runtime guard for unknown node types in useSocket message handler
+[2026-02-17 16:52:11] Initialized git repository, created .gitignore with project.log exclusion rule, created initial commit with 38 source files, and pushed to GitHub at https://github.com/Danieldckh/neural-claude-viz
+[2026-02-17 16:52:34] Updated PROJECTS.md with full project description and GitHub repo URL for neural-claude-viz
+[2026-02-17 17:00:29] Deployed neural-claude-viz to Coolify using Dockerfile build pack on port 4800 with DEPLOY_MODE, PORT, and NEURAL_VIZ_API_KEY env vars set, custom domain neural-viz.proagrihub.com configured
+[2026-02-17 17:00:49] Initialized git repo, pushed to GitHub at Danieldckh/neural-claude-viz
+[2026-02-17 17:00:50] Deployed to Coolify at neural-viz.proagrihub.com with Dockerfile build and API key auth
+[2026-02-17 17:01:24] Configured Claude Code hooks in settings.local.json to POST events to Coolify server
+[2026-02-17 17:29:50] Added birthTime and connectionCount fields to NeuralNode interface in types.ts
+[2026-02-17 17:31:01] Updated graphStore.ts addNode for tree layout positioning and addEdge to increment connectionCount
+[2026-02-17 17:31:41] Reworked physics.ts with calmer forces, heavier damping, removed Brownian drift, added left-to-right flow force
+[2026-02-17 17:32:29] Updated nodes.ts with fade-in alpha from birthTime, growth scaling from connectionCount, and slower pulse animations
+[2026-02-17 17:33:08] Reworked edges.ts with quadratic bezier curves, sibling fan-out offsets, thinner lines, lower alpha, slower pulse, and fade-in
+[2026-02-17 17:33:42] Updated particles.ts with fewer particles, slower speed, slower decay, smaller size, lower alpha, removed shadowBlur
+[2026-02-17 17:34:21] Made ambient glow subtler in renderer.ts by reducing inner gradient alpha from 0.4 to 0.2

@@ -15,6 +15,8 @@ export interface NeuralNode {
   glowIntensity: number;
   parentAgentId?: string;
   status: 'active' | 'completed' | 'pending';
+  birthTime: number;
+  connectionCount: number;
 }
 
 // Edge connecting two nodes

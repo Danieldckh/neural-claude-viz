@@ -13,7 +13,7 @@ export function updateParticles(particles: Particle[]): Particle[] {
     p.y += p.vy;
     p.vx *= 0.98;
     p.vy *= 0.98;
-    p.life -= 0.02;
+    p.life -= 0.01;
 
     if (p.life > 0) {
       alive.push(p);
@@ -24,7 +24,7 @@ export function updateParticles(particles: Particle[]): Particle[] {
 }
 
 /**
- * Draw all living particles with a soft glow.
+ * Draw all living particles (no shadowBlur for less visual noise).
  */
 export function drawParticles(
   ctx: CanvasRenderingContext2D,
@@ -36,33 +36,31 @@ export function drawParticles(
 
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
-    ctx.globalAlpha = p.life * 0.8;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 6;
+    ctx.globalAlpha = p.life * 0.5;
     ctx.fillStyle = p.color;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  ctx.shadowBlur = 0;
   ctx.globalAlpha = prevAlpha;
 }
 
 /**
  * Create a burst of particles radiating outward from a point.
+ * Calmer: fewer, slower, smaller particles.
  */
 export function spawnBurst(
   x: number,
   y: number,
   color: string,
-  count = 16,
+  count = 8,
 ): Particle[] {
   const particles: Particle[] = [];
 
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-    const speed = 1.5 + Math.random() * 2.5;
+    const speed = 0.5 + Math.random() * 1.0;
     particles.push({
       x,
       y,
@@ -70,7 +68,7 @@ export function spawnBurst(
       vy: Math.sin(angle) * speed,
       life: 1.0,
       color,
-      radius: 1.5 + Math.random() * 2,
+      radius: 1.0 + Math.random() * 1.0,
     });
   }
 

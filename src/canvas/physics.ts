@@ -1,21 +1,20 @@
 import type { NeuralNode, NeuralEdge } from '../types';
 
-const REPULSION_STRENGTH = 800;
-const ATTRACTION_STRENGTH = 0.01;
-const GRAVITY_STRENGTH = 0.02;
-const DAMPING = 0.92;
-const MAX_VELOCITY = 4;
+const REPULSION_STRENGTH = 200;
+const ATTRACTION_STRENGTH = 0.005;
+const GRAVITY_STRENGTH = 0.005;
+const DAMPING = 0.97;
+const MAX_VELOCITY = 1.5;
 const AGENT_ORBIT_RADIUS = 80;
 const MIN_DISTANCE = 20;
 
-export function createPhysicsEngine() {
-  let frameCount = 0;
+// Left-to-right flow: gently push nodes rightward by creation order
+const FLOW_STRENGTH = 0.003;
 
+export function createPhysicsEngine() {
   return function updatePhysics(nodes: NeuralNode[], edges: NeuralEdge[]): void {
     const len = nodes.length;
     if (len === 0) return;
-
-    frameCount++;
 
     // Build id → node map for O(1) lookups
     const nodeMap = new Map<string, NeuralNode>();
@@ -71,7 +70,15 @@ export function createPhysicsEngine() {
       node.vy -= node.y * GRAVITY_STRENGTH;
     }
 
-    // --- Agent containment: children pulled toward parent ---
+    // --- Left-to-right flow force: later nodes pushed right, earlier left ---
+    for (let i = 0; i < len; i++) {
+      const node = nodes[i];
+      // Target x position based on creation order (index)
+      const targetX = i * 100;
+      node.vx += (targetX - node.x) * FLOW_STRENGTH;
+    }
+
+    // --- Agent containment: children pulled toward parent (gentler) ---
     for (let i = 0; i < len; i++) {
       const node = nodes[i];
       if (!node.parentAgentId) continue;
@@ -85,7 +92,7 @@ export function createPhysicsEngine() {
 
       if (dist > AGENT_ORBIT_RADIUS) {
         const overshoot = dist - AGENT_ORBIT_RADIUS;
-        const pullStrength = 0.03;
+        const pullStrength = 0.015;
         node.vx -= (dx / dist) * overshoot * pullStrength;
         node.vy -= (dy / dist) * overshoot * pullStrength;
       }
@@ -94,12 +101,6 @@ export function createPhysicsEngine() {
     // --- Integrate: damping, velocity cap, position update ---
     for (let i = 0; i < len; i++) {
       const node = nodes[i];
-
-      // Subtle Brownian drift every ~120 frames
-      if (frameCount % 120 === 0) {
-        node.vx += (Math.random() - 0.5) * 0.3;
-        node.vy += (Math.random() - 0.5) * 0.3;
-      }
 
       node.vx *= DAMPING;
       node.vy *= DAMPING;
