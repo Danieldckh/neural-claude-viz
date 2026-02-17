@@ -99,6 +99,34 @@ export function parseHookEvent(
       break
     }
 
+    case 'Notification': {
+      // Claude's intermediate text output — shows as a tiny thought dot
+      nodeType = 'thought'
+      label = 'Thinking'
+      content = typeof payload.message === 'string'
+        ? payload.message
+        : (typeof payload.tool_result === 'string' ? payload.tool_result : JSON.stringify(payload))
+      // Connect to the last node in the session
+      // Thoughts branch from the last thought/prompt
+      parentNodeId = state.lastThoughtOrPromptId ?? state.lastNodeId
+      state.lastThoughtOrPromptId = id
+      break
+    }
+
+    case 'UserPromptSubmit': {
+      // User typed a new prompt
+      nodeType = 'prompt'
+      label = 'User Prompt'
+      content = typeof payload.message === 'string'
+        ? payload.message
+        : (typeof payload.tool_input === 'object' && payload.tool_input?.prompt
+          ? String(payload.tool_input.prompt)
+          : JSON.stringify(payload))
+      state.lastThoughtOrPromptId = id
+      state.lastActionId = null
+      break
+    }
+
     default: {
       nodeType = 'thought'
       label = hookType

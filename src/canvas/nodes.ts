@@ -38,14 +38,17 @@ export function drawNodeGlows(
     const node = nodes[i];
     const config = NODE_CONFIG[node.type];
     const fadeAlpha = getFadeAlpha(node);
-    const growthScale = 1 + node.connectionCount * 0.08;
+    const isThought = node.type === 'thought';
+    const maxAlpha = isThought ? 0.35 : 1.0;
+    const finalAlpha = fadeAlpha * maxAlpha;
+    const growthScale = isThought ? 1.0 : (1 + node.connectionCount * 0.08);
     const glowR = config.glowRadius * growthScale;
 
     const grad = ctx.createRadialGradient(
       node.x, node.y, 0,
       node.x, node.y, glowR,
     );
-    const alpha = Math.max(0, Math.min(1, 0.4 * node.glowIntensity)) * fadeAlpha;
+    const alpha = Math.max(0, Math.min(1, 0.4 * node.glowIntensity)) * finalAlpha;
     grad.addColorStop(0, colorWithAlpha(node.color, alpha));
     grad.addColorStop(1, colorWithAlpha(node.color, 0));
 
@@ -68,11 +71,15 @@ export function drawNodes(
     const node = nodes[i];
     const isSelected = node.id === selectedNodeId;
     const fadeAlpha = getFadeAlpha(node);
-    const baseRadius = getGrowthRadius(node.radius, node.connectionCount);
+    const isThought = node.type === 'thought';
+    const maxAlpha = isThought ? 0.35 : 1.0;
+    const finalAlpha = fadeAlpha * maxAlpha;
+    const growthScale = isThought ? 1.0 : getGrowthRadius(1, node.connectionCount);
+    const baseRadius = node.radius * growthScale;
     const drawRadius = isSelected ? baseRadius * 1.2 : baseRadius;
 
     ctx.save();
-    ctx.globalAlpha = fadeAlpha;
+    ctx.globalAlpha = finalAlpha;
 
     // Selected: extra bright glow
     if (isSelected) {

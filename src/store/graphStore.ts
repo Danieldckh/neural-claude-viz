@@ -40,28 +40,20 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   addNode: (partial) => {
     const config = NODE_CONFIG[partial.type];
     const state = get();
-    // Position to the RIGHT of parent for tree layout
-    const parentNode = partial.parentAgentId
-      ? state.nodes.find(n => n.id === partial.parentAgentId)
-      : state.nodes[state.nodes.length - 1];
 
+    // Default position: off-screen placeholder; addEdge will reposition
+    // when the connecting edge arrives, creating proper branching layout.
+    // If explicit x/y provided, use them. Otherwise place root nodes
+    // left-to-right and child nodes off-screen until their edge arrives.
     let nx: number;
     let ny: number;
 
     if (partial.x != null && partial.y != null) {
       nx = partial.x;
       ny = partial.y;
-    } else if (parentNode) {
-      // Count how many children this parent already has (for vertical stagger)
-      const siblingCount = state.nodes.filter(
-        n => n.parentAgentId === (partial.parentAgentId ?? parentNode.id),
-      ).length;
-      // Place to the right, fan children vertically
-      nx = parentNode.x + 120;
-      ny = parentNode.y + (siblingCount - (siblingCount > 0 ? (siblingCount - 1) / 2 : 0)) * 50;
     } else {
-      // First node or no parent — place near center, staggered by index
-      nx = state.nodes.length * 120;
+      // Placeholder — will be repositioned by addEdge
+      nx = state.nodes.length * 140;
       ny = 0;
     }
 
@@ -99,12 +91,31 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       createdAt: Date.now(),
     };
 
+    // First, add the edge and increment connectionCount on source
     set(state => ({
       edges: [...state.edges, edge],
-      // Increment connectionCount on the source node
       nodes: state.nodes.map(n =>
         n.id === partial.sourceId
           ? { ...n, connectionCount: n.connectionCount + 1 }
+          : n,
+      ),
+    }));
+
+    // Reposition the target node to branch off the source node.
+    // Count how many edges share this source (including the one just added)
+    // to fan children out vertically.
+    const state = get();
+    const siblingEdges = state.edges.filter(e => e.sourceId === partial.sourceId);
+    const siblingIndex = siblingEdges.length - 1; // index of the edge just added
+    const totalSiblings = siblingEdges.length;
+
+    const targetX = sourceNode.x + 140;
+    const targetY = sourceNode.y + (siblingIndex - (totalSiblings - 1) / 2) * 60;
+
+    set(state => ({
+      nodes: state.nodes.map(n =>
+        n.id === partial.targetId
+          ? { ...n, x: targetX, y: targetY }
           : n,
       ),
     }));

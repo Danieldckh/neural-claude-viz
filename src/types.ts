@@ -77,7 +77,7 @@ export const COLORS = {
 // Node config by type
 export const NODE_CONFIG: Record<NeuralNode['type'], { radius: number; glowRadius: number; color: string; ring: boolean }> = {
   prompt:  { radius: 12, glowRadius: 24, color: COLORS.prompt,  ring: false },
-  thought: { radius: 5,  glowRadius: 12, color: COLORS.thought, ring: false },
+  thought: { radius: 3,  glowRadius: 6,  color: COLORS.thought, ring: false },
   action:  { radius: 8,  glowRadius: 16, color: COLORS.action,  ring: false },
   agent:   { radius: 22, glowRadius: 40, color: COLORS.agent,   ring: true  },
   result:  { radius: 6,  glowRadius: 14, color: COLORS.result,  ring: false },

@@ -65,3 +65,10 @@
 [2026-02-17 17:41:47] Updated server/index.ts bridge endpoint to use parentNodeId for edge creation
 [2026-02-17 17:42:07] Verified zero TypeScript errors after all changes
 [2026-02-17 17:42:18] Updated server/sessionWatcher.ts to use parentNodeId for edge creation
+[2026-02-17 17:46:19] Refactored addNode to use placeholder positions and addEdge to reposition target nodes for proper branching tree layout
+[2026-02-17 17:46:35] Reduced thought node radius to 3 and glowRadius to 6 for tiny dot appearance
+[2026-02-17 17:47:12] Added faded rendering for thought nodes with 0.35 max alpha and disabled growth scaling in nodes.ts
+[2026-02-17 17:47:32] Made edges targeting thought nodes thinner (0.5) and more faded (0.15 alpha) in edges.ts
+[2026-02-17 17:47:51] Added Notification and UserPromptSubmit to VALID_HOOK_TYPES in hookHandler.ts
+[2026-02-17 17:47:58] Added Notification and UserPromptSubmit case blocks to parseHookEvent switch in eventParser.ts
+[2026-02-17 17:48:04] Added Notification and UserPromptSubmit hook entries to settings.local.json

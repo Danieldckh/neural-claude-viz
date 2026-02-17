@@ -5,7 +5,7 @@ import { parseHookEvent, type SessionState } from './eventParser.js'
 import type { HookPayload } from './types.js'
 import type { WSMessage } from '../src/types.js'
 
-const VALID_HOOK_TYPES = new Set(['PreToolUse', 'PostToolUse', 'Stop', 'SubagentStop'])
+const VALID_HOOK_TYPES = new Set(['PreToolUse', 'PostToolUse', 'Stop', 'SubagentStop', 'Notification', 'UserPromptSubmit'])
 
 // Color mapping by node type
 const NODE_COLORS: Record<string, string> = {

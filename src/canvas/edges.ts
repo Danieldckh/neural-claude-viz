@@ -68,10 +68,14 @@ export function drawEdges(
     grad.addColorStop(0, source.color);
     grad.addColorStop(1, target.color);
 
+    const isThoughtEdge = target.type === 'thought';
+
     ctx.save();
-    ctx.globalAlpha = (isActive ? 0.6 : 0.3) * edgeFade;
+    ctx.globalAlpha = isThoughtEdge
+      ? 0.15 * edgeFade
+      : (isActive ? 0.6 : 0.3) * edgeFade;
     ctx.strokeStyle = grad;
-    ctx.lineWidth = isActive ? 1.5 : 0.8;
+    ctx.lineWidth = isThoughtEdge ? 0.5 : (isActive ? 1.5 : 0.8);
 
     ctx.beginPath();
     ctx.moveTo(source.x, source.y);
