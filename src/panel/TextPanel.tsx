@@ -18,7 +18,7 @@ const typeColorMap: Record<NeuralNode['type'], string> = {
 export default function TextPanel() {
   const eventLog = useGraphStore(s => s.eventLog);
   const selectedNodeId = useGraphStore(s => s.selectedNodeId);
-  const setSelected = useGraphStore(s => s.setSelected);
+  const zoomToNode = useGraphStore(s => s.zoomToNode);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isUserScrolled = useRef(false);
@@ -57,6 +57,14 @@ export default function TextPanel() {
       }
     }
   }, [filteredEvents.length]);
+
+  useEffect(() => {
+    if (!selectedNodeId || !scrollRef.current) return;
+    const target = scrollRef.current.querySelector(`[data-node-id="${selectedNodeId}"]`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedNodeId]);
 
   return (
     <div
@@ -163,7 +171,8 @@ export default function TextPanel() {
             key={entry.id}
             entry={entry}
             isSelected={selectedNodeId === entry.nodeId}
-            onClick={() => setSelected(entry.nodeId)}
+            onClick={() => zoomToNode(entry.nodeId)}
+            data-node-id={entry.nodeId}
           />
         ))}
       </div>

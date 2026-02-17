@@ -1,5 +1,53 @@
 import type { Particle } from '../types';
 
+// --- Ambient floating dust particles (module-level state) ---
+const AMBIENT_COUNT = 40;
+let ambientParticles: { x: number; y: number; vx: number; vy: number; alpha: number; radius: number }[] = [];
+let ambientInitialized = false;
+
+/**
+ * Draw subtle floating dust particles in the background for atmosphere.
+ * Particles drift slowly and wrap around the visible world space.
+ */
+export function drawAmbientParticles(
+  ctx: CanvasRenderingContext2D,
+  _canvasWidth: number,
+  _canvasHeight: number,
+): void {
+  if (!ambientInitialized) {
+    // Initialize particles spread across world space (roughly -500 to 500)
+    for (let i = 0; i < AMBIENT_COUNT; i++) {
+      ambientParticles.push({
+        x: (Math.random() - 0.5) * 1000,
+        y: (Math.random() - 0.5) * 1000,
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.1,
+        alpha: 0.03 + Math.random() * 0.06,
+        radius: 1 + Math.random() * 2,
+      });
+    }
+    ambientInitialized = true;
+  }
+
+  // Update positions and draw
+  for (const p of ambientParticles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    // Wrap around world boundaries
+    if (p.x > 600) p.x = -600;
+    if (p.x < -600) p.x = 600;
+    if (p.y > 600) p.y = -600;
+    if (p.y < -600) p.y = 600;
+
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
 /**
  * Advance particle positions, apply drag, decay life.
  * Returns only particles still alive (life > 0).

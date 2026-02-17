@@ -17,8 +17,19 @@ export function screenToWorld(
 }
 
 /**
- * Draw labels beneath hovered or selected nodes.
- * Renders a dark rounded-rect background with white text.
+ * Truncate a string to maxLen characters, appending "..." if truncated.
+ */
+function truncateLabel(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen) + '...';
+}
+
+/**
+ * Draw labels beneath nodes.
+ * - Thought nodes: no labels (too small, would clutter).
+ * - Hovered/selected nodes: 11px, alpha 0.9, with dark background pill.
+ * - All other nodes: 9px, alpha 0.4, text only (no background pill).
+ * Labels are truncated to 20 characters.
  */
 export function drawLabels(
   ctx: CanvasRenderingContext2D,
@@ -28,35 +39,53 @@ export function drawLabels(
 ): void {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    if (node.id !== hoveredNodeId && node.id !== selectedNodeId) continue;
 
-    const label = node.label;
-    if (!label) continue;
+    // Skip thought nodes entirely -- labels would clutter tiny dots
+    if (node.type === 'thought') continue;
+
+    const rawLabel = node.label;
+    if (!rawLabel) continue;
+
+    const label = truncateLabel(rawLabel, 20);
+    const isHighlighted = node.id === hoveredNodeId || node.id === selectedNodeId;
 
     ctx.save();
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    const metrics = ctx.measureText(label);
-    const textWidth = metrics.width;
-    const textHeight = 14;
-    const padX = 6;
-    const padY = 4;
-    const boxWidth = textWidth + padX * 2;
-    const boxHeight = textHeight + padY * 2;
-    const boxX = node.x - boxWidth / 2;
-    const boxY = node.y + node.radius + 8;
 
-    // Background pill
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = '#0a0a14';
-    roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 4);
-    ctx.fill();
+    if (isHighlighted) {
+      // Prominent label with background pill
+      ctx.font = '11px Inter, system-ui, sans-serif';
+      const metrics = ctx.measureText(label);
+      const textWidth = metrics.width;
+      const textHeight = 14;
+      const padX = 6;
+      const padY = 4;
+      const boxWidth = textWidth + padX * 2;
+      const boxHeight = textHeight + padY * 2;
+      const boxX = node.x - boxWidth / 2;
+      const boxY = node.y + node.radius + 8;
 
-    // Text
-    ctx.globalAlpha = 0.9;
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText(label, node.x, boxY + padY);
+      // Background pill
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#0a0a14';
+      roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 4);
+      ctx.fill();
+
+      // Text
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(label, node.x, boxY + padY);
+    } else {
+      // Subtle always-visible label, no background
+      ctx.font = '9px Inter, system-ui, sans-serif';
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(label, node.x, node.y + node.radius + 6);
+    }
+
     ctx.restore();
   }
 }

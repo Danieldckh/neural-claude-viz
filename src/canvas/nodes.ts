@@ -111,6 +111,18 @@ export function drawNodes(
       ctx.setLineDash([]);
     }
 
+    // Subtle expanding pulse ring on active non-thought nodes
+    if (node.status === 'active' && node.type !== 'thought') {
+      const now = performance.now();
+      const pulseRadius = drawRadius + 8 + Math.sin(now * 0.002) * 4;
+      const pulseAlpha = 0.1 * finalAlpha * (0.5 + 0.5 * Math.sin(now * 0.002));
+      ctx.strokeStyle = colorWithAlpha(node.color, pulseAlpha);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, pulseRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
     ctx.restore();
   }
 }

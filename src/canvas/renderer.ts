@@ -2,7 +2,7 @@ import type { NeuralNode, NeuralEdge, Particle, CameraTransform } from '../types
 import { COLORS } from '../types';
 import { drawEdges } from './edges';
 import { drawAgentRings, drawNodeGlows, drawNodes } from './nodes';
-import { drawParticles } from './particles';
+import { drawParticles, drawAmbientParticles } from './particles';
 import { drawLabels } from './interaction';
 
 /**
@@ -47,6 +47,7 @@ export function render(
   );
 
   // --- Draw layers (back to front) ---
+  drawAmbientParticles(ctx, canvasWidth, canvasHeight);
   drawEdges(ctx, edges, nodes);
   drawAgentRings(ctx, nodes);
   drawNodeGlows(ctx, nodes);

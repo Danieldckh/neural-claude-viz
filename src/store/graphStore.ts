@@ -21,6 +21,7 @@ interface GraphState {
   setSelected: (nodeId: string | null) => void;
   setCamera: (camera: Partial<CameraTransform>) => void;
   setConnected: (connected: boolean) => void;
+  zoomToNode: (nodeId: string) => void;
 
   // Selectors
   getNodeById: (id: string) => NeuralNode | undefined;
@@ -158,6 +159,15 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   },
 
   setConnected: (connected) => set({ connected }),
+
+  zoomToNode: (nodeId) => {
+    const node = get().nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    set({
+      camera: { x: -node.x, y: -node.y, scale: 1.2 },
+      selectedNodeId: nodeId,
+    });
+  },
 
   // Selectors
   getNodeById: (id) => get().nodes.find(n => n.id === id),

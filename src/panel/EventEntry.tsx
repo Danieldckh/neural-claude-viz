@@ -6,6 +6,7 @@ interface EventEntryProps {
   entry: EventLogEntry;
   isSelected: boolean;
   onClick: () => void;
+  'data-node-id'?: string;
 }
 
 const typeColorMap: Record<EventLogEntry['nodeType'], string> = {
@@ -25,9 +26,12 @@ function formatTime(timestamp: number): string {
   return `${h}:${m}:${s}`;
 }
 
-export default function EventEntry({ entry, isSelected, onClick }: EventEntryProps) {
+export default function EventEntry({ entry, isSelected, onClick, 'data-node-id': dataNodeId }: EventEntryProps) {
   const [expanded, setExpanded] = useState(false);
   const color = typeColorMap[entry.nodeType];
+
+  const gradientSelected = `linear-gradient(to right, ${color}1a, transparent)`;
+  const gradientHover = `linear-gradient(to right, ${color}0d, transparent)`;
 
   const handleClick = useCallback(() => {
     setExpanded(prev => !prev);
@@ -37,6 +41,7 @@ export default function EventEntry({ entry, isSelected, onClick }: EventEntryPro
   return (
     <button
       type="button"
+      data-node-id={dataNodeId}
       onClick={handleClick}
       style={{
         display: 'flex',
@@ -47,20 +52,20 @@ export default function EventEntry({ entry, isSelected, onClick }: EventEntryPro
         padding: '8px 10px 8px 0',
         border: 'none',
         borderLeft: `4px solid ${color}`,
-        background: isSelected ? '#1a1a2e' : 'transparent',
+        background: isSelected ? gradientSelected : 'transparent',
         cursor: 'pointer',
         textAlign: 'left',
         fontFamily: 'inherit',
-        transition: 'background 0.15s ease',
+        transition: 'background 0.3s ease',
         boxShadow: isSelected ? `inset 4px 0 8px -2px ${color}40` : 'none',
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
-          e.currentTarget.style.background = '#0d1117';
+          e.currentTarget.style.background = gradientHover;
         }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = isSelected ? '#1a1a2e' : 'transparent';
+        e.currentTarget.style.background = isSelected ? gradientSelected : 'transparent';
       }}
     >
       <div

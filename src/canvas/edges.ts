@@ -1,6 +1,17 @@
 import type { NeuralNode, NeuralEdge } from '../types';
 
 /**
+ * Convert a hex color to rgba with given alpha.
+ */
+function colorWithAlpha(hex: string, alpha: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/**
  * Draw all edges as curved bezier lines between connected nodes.
  * Sibling edges from the same source fan out with perpendicular offsets.
  * Active edges show a traveling pulse dot.
@@ -60,27 +71,39 @@ export function drawEdges(
     const mx = (source.x + target.x) / 2 + perpX * perpOffset;
     const my = (source.y + target.y) / 2 + perpY * perpOffset;
 
-    // Gradient from source color to target color
+    // Gradient from source color to target color with opacity fade
+    // Near source: full alpha; near target: 60% alpha (gives flow direction)
+    const isThoughtEdge = target.type === 'thought';
+    const baseAlpha = isThoughtEdge
+      ? 0.15 * edgeFade
+      : (isActive ? 0.6 : 0.3) * edgeFade;
+
     const grad = ctx.createLinearGradient(
       source.x, source.y,
       target.x, target.y,
     );
-    grad.addColorStop(0, source.color);
-    grad.addColorStop(1, target.color);
-
-    const isThoughtEdge = target.type === 'thought';
+    grad.addColorStop(0, colorWithAlpha(source.color, baseAlpha));
+    grad.addColorStop(1, colorWithAlpha(target.color, baseAlpha * 0.6));
 
     ctx.save();
-    ctx.globalAlpha = isThoughtEdge
-      ? 0.15 * edgeFade
-      : (isActive ? 0.6 : 0.3) * edgeFade;
+    ctx.globalAlpha = 1; // Alpha is baked into the gradient stops
     ctx.strokeStyle = grad;
     ctx.lineWidth = isThoughtEdge ? 0.5 : (isActive ? 1.5 : 0.8);
+
+    // Subtle glow on active non-thought edges
+    if (isActive && !isThoughtEdge) {
+      ctx.shadowColor = edge.color;
+      ctx.shadowBlur = 4;
+    }
 
     ctx.beginPath();
     ctx.moveTo(source.x, source.y);
     ctx.quadraticCurveTo(mx, my, target.x, target.y);
     ctx.stroke();
+
+    // Clear shadow state
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
     ctx.restore();
 
     // Pulse dot on active edges (follows curve)

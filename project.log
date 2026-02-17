@@ -75,3 +75,11 @@
 [2026-02-17 18:56:55] Reworked graphStore addNode and addEdge for radial mindmap layout with center-outward positioning
 [2026-02-17 18:57:22] Replaced left-to-right flow force with radial spread physics for circular mindmap layout
 [2026-02-17 18:57:43] Replaced rightward-panning auto-camera with zoom-to-fit for radial mindmap layout
+[2026-02-17 19:02:39] Added zoomToNode action to GraphState interface and store implementation in graphStore.ts
+[2026-02-17 19:02:42] Updated TextPanel.tsx to use zoomToNode on entry click and added auto-scroll to selected entry
+[2026-02-17 19:02:44] Updated EventEntry.tsx with gradient hover and selected backgrounds and data-node-id attribute
+[2026-02-17 19:02:54] Updated drawLabels in interaction.ts to show always-visible compact labels on all non-thought nodes with truncation
+[2026-02-17 19:02:57] Added drawAmbientParticles function to particles.ts with 40 floating dust particles for background atmosphere
+[2026-02-17 19:02:59] Integrated ambient particles layer into renderer.ts between camera transform and edge drawing
+[2026-02-17 19:03:01] Added opacity gradient fade and subtle glow on active edges in edges.ts for flow direction visual
+[2026-02-17 19:03:03] Added subtle expanding pulse ring animation on active non-thought nodes in nodes.ts
