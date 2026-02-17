@@ -1,0 +1,44 @@
+﻿[2026-02-17 16:27:06] Created brand definition for neural visualization aesthetic
+[2026-02-17 16:29:11] Scaffolded Vite React-TS project with npm create vite
+[2026-02-17 16:29:17] Installed main deps: zustand express ws chokidar cors nanoid
+[2026-02-17 16:29:18] Installed dev deps: types-express types-ws tsx tailwindcss tailwindcss-vite concurrently
+[2026-02-17 16:29:28] Updated vite.config.ts with Tailwind plugin and proxy config for api and ws
+[2026-02-17 16:29:29] Created tsconfig.node.json for server-side TypeScript compilation
+[2026-02-17 16:29:30] Updated package.json scripts with concurrently dev server and client commands
+[2026-02-17 16:29:49] Created directory structure: server, src/store, src/hooks, src/canvas, src/panel
+[2026-02-17 16:29:49] Created server/index.ts with Express, WebSocket, and health endpoint on port 4800
+[2026-02-17 16:31:21] Created shared TypeScript type definitions for nodes edges particles and events
+[2026-02-17 16:31:22] Created server-side TypeScript types for hooks sessions and bridge
+[2026-02-17 16:31:22] Created Zustand graph store with nodes edges particles and event log
+[2026-02-17 16:31:22] Created WebSocket connection hook with auto-reconnect and message dispatching
+[2026-02-17 16:33:06] Created server/eventParser.ts with parseHookEvent and parseSessionMessage functions for normalizing hook payloads and session messages into ParsedEvents
+[2026-02-17 16:33:19] Created physics.ts with force-directed simulation including repulsion, spring attraction, gravity, agent containment, and Brownian drift
+[2026-02-17 16:33:43] Created particles.ts with updateParticles, drawParticles, and spawnBurst functions
+[2026-02-17 16:33:44] Created server/hookHandler.ts with Express router for POST /api/hook/:type endpoint with auth, validation, and WebSocket broadcasting
+[2026-02-17 16:34:09] Created nodes.ts with drawNodeGlows, drawNodes, drawAgentRings, and updateAnimations functions
+[2026-02-17 16:34:26] Created edges.ts with drawEdges function including gradient lines and traveling pulse dots
+[2026-02-17 16:34:31] Created server/sessionWatcher.ts with chokidar file watcher for JSONL session files with tail-f behavior and WebSocket broadcasting
+[2026-02-17 16:34:31] Created bridge.ts — standalone JSONL bridge script that watches ~/.claude/projects/ for .jsonl files and streams session data to a remote server via POST
+[2026-02-17 16:34:44] Created Dockerfile — multi-stage build with node:20-alpine for frontend build and production server on port 4800
+[2026-02-17 16:35:00] Updated server/index.ts to wire hookHandler router, sessionWatcher, bridge endpoint, WS broadcast, ping interval, and static file serving
+[2026-02-17 16:35:01] Created setup-hooks.sh — hook configuration script that merges Claude Code hook entries into settings.local.json for local or remote mode
+[2026-02-17 16:35:06] Created interaction.ts with setupInteraction, screenToWorld, drawLabels, and hit-testing for pan/zoom/select/hover
+[2026-02-17 16:35:22] Created renderer.ts orchestrating full render pipeline: background, camera transform, edges, rings, glows, nodes, particles, labels
+[2026-02-17 16:35:50] Created NeuralCanvas.tsx React component with RAF loop, ResizeObserver, DPI scaling, physics/animation/render pipeline, and interaction setup
+[2026-02-17 16:36:43] Cleaned up NeuralCanvas.tsx setCamera callback type to use Partial<CameraTransform> directly
+[2026-02-17 16:36:44] Fixed Express 5 wildcard route syntax and installed @types/cors for TypeScript compilation
+[2026-02-17 16:39:08] Replaced index.css with Tailwind 4 theme tokens and dark scrollbar styles
+[2026-02-17 16:39:09] Updated index.html with Inter and JetBrains Mono Google Fonts and new title
+[2026-02-17 16:39:10] Updated main.tsx entry point to import App without .tsx extension
+[2026-02-17 16:40:08] Created EventEntry.tsx component with colored left bar, timestamp, label, and expandable content
+[2026-02-17 16:40:31] Created TextPanel.tsx with filter bar, auto-scroll event log, and store integration
+[2026-02-17 16:41:01] Replaced App.tsx with split-pane layout, header bar, connection status, and draggable resize handle
+[2026-02-17 16:42:58] Removed old Vite template files and added demo event injection button to App header
+[2026-02-17 16:42:58] Verified full TypeScript compilation and Vite production build with zero errors
+[2026-02-17 16:46:09] Created comprehensive project README documentation
+[2026-02-17 16:50:24] Fixed animation loop restart on hover by using ref for hoveredNodeId instead of dep array
+[2026-02-17 16:50:25] Fixed auth bypass when NEURAL_VIZ_API_KEY unset in non-local mode in server index and hookHandler
+[2026-02-17 16:50:26] Fixed WebSocket reconnect after unmount race with isMountedRef guard
+[2026-02-17 16:50:27] Optimized physics from O(n^3) to O(n^2+m) using nodeMap for edge and parent lookups
+[2026-02-17 16:50:29] Encapsulated physics frameCount in createPhysicsEngine closure to prevent global state issues
+[2026-02-17 16:50:30] Added runtime guard for unknown node types in useSocket message handler

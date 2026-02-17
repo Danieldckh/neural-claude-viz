@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neural-bg: #06060f;
+  --color-neural-grid: #0d1117;
+  --color-neural-panel: #0a0a14;
+  --color-neural-border: #1a1a2e;
+  --color-neural-thought: #00d4ff;
+  --color-neural-action: #00ff88;
+  --color-neural-prompt: #bb86fc;
+  --color-neural-agent: #ff9800;
+  --color-neural-result: #ff4081;
+  --color-neural-error: #ff1744;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #06060f;
+  color: #e0e0e0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Custom scrollbar for text panel */
+.panel-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.panel-scroll::-webkit-scrollbar-track {
+  background: #0a0a14;
+}
+.panel-scroll::-webkit-scrollbar-thumb {
+  background: #1a1a2e;
+  border-radius: 3px;
+}
+.panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: #2a2a3e;
+}
+
+/* Monospace for data */
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
