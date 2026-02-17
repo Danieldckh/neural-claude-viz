@@ -72,6 +72,7 @@ export function setupInteraction(
   getNodes: () => NeuralNode[],
   setSelected: (nodeId: string | null) => void,
   setHovered: (nodeId: string | null) => void,
+  onUserInteraction?: () => void,
 ): () => void {
   let isDragging = false;
   let dragStartX = 0;
@@ -81,6 +82,7 @@ export function setupInteraction(
   // --- Wheel: zoom toward mouse ---
   function onWheel(e: WheelEvent) {
     e.preventDefault();
+    if (onUserInteraction) onUserInteraction();
     const camera = getCamera();
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -105,6 +107,7 @@ export function setupInteraction(
   // --- Mouse down: start potential drag ---
   function onMouseDown(e: MouseEvent) {
     if (e.button !== 0) return;
+    if (onUserInteraction) onUserInteraction();
     isDragging = true;
     dragMoved = false;
     dragStartX = e.clientX;

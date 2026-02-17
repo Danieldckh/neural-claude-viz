@@ -55,3 +55,13 @@
 [2026-02-17 17:33:08] Reworked edges.ts with quadratic bezier curves, sibling fan-out offsets, thinner lines, lower alpha, slower pulse, and fade-in
 [2026-02-17 17:33:42] Updated particles.ts with fewer particles, slower speed, slower decay, smaller size, lower alpha, removed shadowBlur
 [2026-02-17 17:34:21] Made ambient glow subtler in renderer.ts by reducing inner gradient alpha from 0.4 to 0.2
+[2026-02-17 17:39:43] Removed clearGraph action from GraphState interface and implementation in graphStore.ts
+[2026-02-17 17:39:50] Added parentNodeId field to ParsedEvent interface in server/types.ts
+[2026-02-17 17:40:04] Updated session_start comment in useSocket.ts to reflect append-only graph policy
+[2026-02-17 17:40:41] Added onUserInteraction callback parameter to setupInteraction in interaction.ts
+[2026-02-17 17:40:54] Updated SessionState and parsing logic in server/eventParser.ts for multi-path branching support
+[2026-02-17 17:41:25] Updated server/hookHandler.ts to use parentNodeId for edge creation
+[2026-02-17 17:41:31] Added auto-camera follow logic to NeuralCanvas.tsx with lastUserInteraction tracking
+[2026-02-17 17:41:47] Updated server/index.ts bridge endpoint to use parentNodeId for edge creation
+[2026-02-17 17:42:07] Verified zero TypeScript errors after all changes
+[2026-02-17 17:42:18] Updated server/sessionWatcher.ts to use parentNodeId for edge creation

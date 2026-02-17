@@ -112,14 +112,15 @@ async function processFile(
       }
       broadcast(nodeAdd)
 
-      // 2. Broadcast edge_add connecting previous node to this one
-      if (previousNodeId) {
+      // 2. Broadcast edge_add connecting parent node to this one
+      const connectFromId = event.parentNodeId ?? previousNodeId
+      if (connectFromId) {
         const edgeColor = NODE_COLORS[event.nodeType] ?? '#00d4ff'
         const edgeAdd: WSMessage = {
           type: 'edge_add',
           payload: {
             id: nanoid(),
-            sourceId: previousNodeId,
+            sourceId: connectFromId,
             targetId: event.id,
             color: edgeColor,
           },

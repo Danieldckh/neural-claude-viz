@@ -16,6 +16,7 @@ export default function NeuralCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const cleanupInteractionRef = useRef<(() => void) | null>(null);
+  const lastUserInteractionRef = useRef<number>(0);
 
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const hoveredNodeIdRef = useRef<string | null>(null);
@@ -39,6 +40,10 @@ export default function NeuralCanvas() {
   const setHovered = useCallback((id: string | null) => {
     setHoveredNodeId(id);
     hoveredNodeIdRef.current = id;
+  }, []);
+
+  const onUserInteraction = useCallback(() => {
+    lastUserInteractionRef.current = performance.now();
   }, []);
 
   // --- Resize handler: match canvas to container, handle DPI ---
@@ -84,6 +89,7 @@ export default function NeuralCanvas() {
       getNodes,
       setSelected,
       setHovered,
+      onUserInteraction,
     );
 
     return () => {
@@ -92,7 +98,7 @@ export default function NeuralCanvas() {
         cleanupInteractionRef.current = null;
       }
     };
-  }, [getCamera, setCamera, getNodes, setSelected, setHovered]);
+  }, [getCamera, setCamera, getNodes, setSelected, setHovered, onUserInteraction]);
 
   // --- Animation loop ---
   useEffect(() => {
@@ -124,6 +130,21 @@ export default function NeuralCanvas() {
 
       // Render
       render(ctx, nodes, edges, updatedParticles, camera, selectedNodeId, hoveredNodeIdRef.current, cw, ch);
+
+      // Auto-camera follow: pan to keep rightmost nodes visible
+      if (nodes.length > 0) {
+        const timeSinceInteraction = performance.now() - lastUserInteractionRef.current;
+        if (timeSinceInteraction > 3000) {
+          let maxX = -Infinity;
+          for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].x > maxX) maxX = nodes[i].x;
+          }
+          const screenX = maxX * camera.scale + cw / 2 + camera.x;
+          if (screenX > cw * 0.7) {
+            state.setCamera({ x: camera.x - 0.5 });
+          }
+        }
+      }
 
       rafRef.current = requestAnimationFrame(frame);
     }

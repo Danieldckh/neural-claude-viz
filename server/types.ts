@@ -44,4 +44,5 @@ export interface ParsedEvent {
   nodeType: 'prompt' | 'thought' | 'action' | 'agent' | 'result' | 'error';
   label: string;
   parentAgentId?: string;
+  parentNodeId?: string | null;
 }

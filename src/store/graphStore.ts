@@ -21,7 +21,6 @@ interface GraphState {
   setSelected: (nodeId: string | null) => void;
   setCamera: (camera: Partial<CameraTransform>) => void;
   setConnected: (connected: boolean) => void;
-  clearGraph: () => void;
 
   // Selectors
   getNodeById: (id: string) => NeuralNode | undefined;
@@ -130,8 +129,6 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   },
 
   setConnected: (connected) => set({ connected }),
-
-  clearGraph: () => set({ nodes: [], edges: [], particles: [], eventLog: [], selectedNodeId: null }),
 
   // Selectors
   getNodeById: (id) => get().nodes.find(n => n.id === id),

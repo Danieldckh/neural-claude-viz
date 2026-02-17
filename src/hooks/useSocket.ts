@@ -119,7 +119,7 @@ export function useSocket() {
       }
 
       case 'session_start': {
-        // Could clear graph or handle new session
+        // Graph is append-only — never cleared on new session
         break;
       }
 

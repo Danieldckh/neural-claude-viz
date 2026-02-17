@@ -1,10 +1,12 @@
 import { nanoid } from 'nanoid'
 import type { HookPayload, SessionMessage, SessionContent, ParsedEvent } from './types.js'
 
-// Session tracking state: sessionId -> { lastNodeId, currentAgentId }
+// Session tracking state: sessionId -> { lastNodeId, currentAgentId, ... }
 export interface SessionState {
   lastNodeId: string | null
   currentAgentId: string | null
+  lastThoughtOrPromptId: string | null
+  lastActionId: string | null
 }
 
 const TOOL_ACTIONS = new Set(['Bash', 'Read', 'Write', 'Edit', 'Grep', 'Glob'])
@@ -27,11 +29,15 @@ export function parseHookEvent(
   let content: string
   let toolName: string | undefined
   let parentAgentId: string | undefined = state.currentAgentId ?? undefined
+  let parentNodeId: string | null = state.lastNodeId
 
   switch (hookType) {
     case 'PreToolUse': {
       toolName = payload.tool_name
       const input = payload.tool_input
+
+      // Branch from the last thought/prompt so multiple tools fan out
+      parentNodeId = state.lastThoughtOrPromptId ?? state.lastNodeId
 
       if (toolName === 'Task') {
         // Subagent spawn
@@ -52,11 +58,17 @@ export function parseHookEvent(
         label = toolName ?? 'Unknown Tool'
         content = typeof input === 'object' ? JSON.stringify(input, null, 2) : String(input ?? '')
       }
+
+      state.lastActionId = id
       break
     }
 
     case 'PostToolUse': {
       toolName = payload.tool_name
+
+      // Result connects from the action it belongs to
+      parentNodeId = state.lastActionId ?? state.lastNodeId
+
       if (payload.error) {
         nodeType = 'error'
         label = `Error: ${toolName ?? 'Tool'}`
@@ -91,6 +103,7 @@ export function parseHookEvent(
       nodeType = 'thought'
       label = hookType
       content = JSON.stringify(payload, null, 2)
+      state.lastThoughtOrPromptId = id
     }
   }
 
@@ -105,6 +118,7 @@ export function parseHookEvent(
     nodeType,
     label,
     parentAgentId,
+    parentNodeId,
   }
 
   state.lastNodeId = id
@@ -127,11 +141,14 @@ export function parseSessionMessage(
   let label: string
   let content: string
   let toolName: string | undefined
+  let parentNodeId: string | null = state.lastNodeId
 
   if (msg.role === 'user') {
     nodeType = 'prompt'
     label = 'User Prompt'
     content = extractTextContent(msg.content)
+    // User prompts become branching anchors
+    state.lastThoughtOrPromptId = id
   } else if (msg.role === 'assistant') {
     // Check if content array contains tool_use
     if (Array.isArray(msg.content)) {
@@ -143,15 +160,22 @@ export function parseSessionMessage(
         content = typeof toolUse.input === 'object'
           ? JSON.stringify(toolUse.input, null, 2)
           : String(toolUse.input ?? '')
+        // Actions branch from the last thought/prompt
+        parentNodeId = state.lastThoughtOrPromptId ?? state.lastNodeId
+        state.lastActionId = id
       } else {
         nodeType = 'thought'
         label = 'Thinking'
         content = extractTextContent(msg.content)
+        // Thoughts become branching anchors
+        state.lastThoughtOrPromptId = id
       }
     } else {
       nodeType = 'thought'
       label = 'Thinking'
       content = typeof msg.content === 'string' ? msg.content : ''
+      // Thoughts become branching anchors
+      state.lastThoughtOrPromptId = id
     }
   } else {
     // system messages — skip
@@ -168,6 +192,7 @@ export function parseSessionMessage(
     label,
     toolName,
     parentAgentId: state.currentAgentId ?? undefined,
+    parentNodeId,
   }
 
   state.lastNodeId = id
@@ -180,7 +205,7 @@ function getOrCreateSession(
 ): SessionState {
   let state = tracker.get(sessionId)
   if (!state) {
-    state = { lastNodeId: null, currentAgentId: null }
+    state = { lastNodeId: null, currentAgentId: null, lastThoughtOrPromptId: null, lastActionId: null }
     tracker.set(sessionId, state)
   }
   return state
