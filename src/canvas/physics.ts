@@ -1,15 +1,13 @@
 import type { NeuralNode, NeuralEdge } from '../types';
 
-const REPULSION_STRENGTH = 200;
+const REPULSION_STRENGTH = 300;
 const ATTRACTION_STRENGTH = 0.005;
-const GRAVITY_STRENGTH = 0.005;
+const GRAVITY_STRENGTH = 0.003;
 const DAMPING = 0.97;
 const MAX_VELOCITY = 1.5;
 const AGENT_ORBIT_RADIUS = 80;
 const MIN_DISTANCE = 20;
-
-// Left-to-right flow: gently push nodes rightward by creation order
-const FLOW_STRENGTH = 0.003;
+const RADIAL_SPREAD_STRENGTH = 0.001;
 
 export function createPhysicsEngine() {
   return function updatePhysics(nodes: NeuralNode[], edges: NeuralEdge[]): void {
@@ -70,12 +68,12 @@ export function createPhysicsEngine() {
       node.vy -= node.y * GRAVITY_STRENGTH;
     }
 
-    // --- Left-to-right flow force: later nodes pushed right, earlier left ---
+    // --- Radial spread: push leaf nodes gently outward from center ---
     for (let i = 0; i < len; i++) {
       const node = nodes[i];
-      // Target x position based on creation order (index)
-      const targetX = i * 100;
-      node.vx += (targetX - node.x) * FLOW_STRENGTH;
+      const distFromCenter = Math.sqrt(node.x * node.x + node.y * node.y) || 1;
+      node.vx += (node.x / distFromCenter) * RADIAL_SPREAD_STRENGTH;
+      node.vy += (node.y / distFromCenter) * RADIAL_SPREAD_STRENGTH;
     }
 
     // --- Agent containment: children pulled toward parent (gentler) ---

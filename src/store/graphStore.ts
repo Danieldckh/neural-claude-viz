@@ -41,20 +41,24 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const config = NODE_CONFIG[partial.type];
     const state = get();
 
-    // Default position: off-screen placeholder; addEdge will reposition
-    // when the connecting edge arrives, creating proper branching layout.
-    // If explicit x/y provided, use them. Otherwise place root nodes
-    // left-to-right and child nodes off-screen until their edge arrives.
+    // Radial mindmap: first node at center, subsequent unparented nodes
+    // at a random angle from center at increasing distance.
     let nx: number;
     let ny: number;
 
     if (partial.x != null && partial.y != null) {
       nx = partial.x;
       ny = partial.y;
-    } else {
-      // Placeholder — will be repositioned by addEdge
-      nx = state.nodes.length * 140;
+    } else if (state.nodes.length === 0) {
+      // First node goes at the center
+      nx = 0;
       ny = 0;
+    } else {
+      // Subsequent nodes without a known parent: random angle from center
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + state.nodes.length * 20;
+      nx = Math.cos(angle) * dist;
+      ny = Math.sin(angle) * dist;
     }
 
     const node: NeuralNode = {
@@ -101,16 +105,30 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       ),
     }));
 
-    // Reposition the target node to branch off the source node.
-    // Count how many edges share this source (including the one just added)
-    // to fan children out vertically.
-    const state = get();
-    const siblingEdges = state.edges.filter(e => e.sourceId === partial.sourceId);
-    const siblingIndex = siblingEdges.length - 1; // index of the edge just added
+    // Radial layout: reposition target node outward from source,
+    // fanning siblings apart around the source's angle from center.
+    const newState = get();
+    const newEdges = newState.edges;
+    const siblingEdges = newEdges.filter(e => e.sourceId === partial.sourceId);
+    const siblingIndex = siblingEdges.length - 1;
     const totalSiblings = siblingEdges.length;
 
-    const targetX = sourceNode.x + 140;
-    const targetY = sourceNode.y + (siblingIndex - (totalSiblings - 1) / 2) * 60;
+    // Angle from center (0,0) to source node
+    let sourceAngleFromCenter: number;
+    const srcDist = Math.sqrt(sourceNode.x * sourceNode.x + sourceNode.y * sourceNode.y);
+    if (srcDist < 1) {
+      // Source is at or very near center — use a random angle
+      sourceAngleFromCenter = Math.random() * Math.PI * 2;
+    } else {
+      sourceAngleFromCenter = Math.atan2(sourceNode.y, sourceNode.x);
+    }
+
+    // Fan children apart around the outward direction
+    const fanOffset = (siblingIndex - (totalSiblings - 1) / 2) * 0.4;
+    const childAngle = sourceAngleFromCenter + fanOffset;
+    const dist = 100 + Math.random() * 20;
+    const targetX = sourceNode.x + Math.cos(childAngle) * dist;
+    const targetY = sourceNode.y + Math.sin(childAngle) * dist;
 
     set(state => ({
       nodes: state.nodes.map(n =>

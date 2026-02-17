@@ -131,17 +131,21 @@ export default function NeuralCanvas() {
       // Render
       render(ctx, nodes, edges, updatedParticles, camera, selectedNodeId, hoveredNodeIdRef.current, cw, ch);
 
-      // Auto-camera follow: pan to keep rightmost nodes visible
+      // Auto-camera: zoom out to fit all nodes in a radial mindmap
       if (nodes.length > 0) {
         const timeSinceInteraction = performance.now() - lastUserInteractionRef.current;
         if (timeSinceInteraction > 3000) {
-          let maxX = -Infinity;
+          // Find the farthest node from center
+          let maxDist = 0;
           for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].x > maxX) maxX = nodes[i].x;
+            const d = Math.sqrt(nodes[i].x * nodes[i].x + nodes[i].y * nodes[i].y);
+            if (d > maxDist) maxDist = d;
           }
-          const screenX = maxX * camera.scale + cw / 2 + camera.x;
-          if (screenX > cw * 0.7) {
-            state.setCamera({ x: camera.x - 0.5 });
+          // Check if farthest node exceeds 80% of the canvas half-size in screen space
+          const canvasHalf = Math.min(cw, ch) / 2;
+          const screenDist = maxDist * camera.scale;
+          if (screenDist > canvasHalf * 0.8 && camera.scale > 0.2) {
+            state.setCamera({ scale: camera.scale - 0.001 });
           }
         }
       }

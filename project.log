@@ -72,3 +72,6 @@
 [2026-02-17 17:47:51] Added Notification and UserPromptSubmit to VALID_HOOK_TYPES in hookHandler.ts
 [2026-02-17 17:47:58] Added Notification and UserPromptSubmit case blocks to parseHookEvent switch in eventParser.ts
 [2026-02-17 17:48:04] Added Notification and UserPromptSubmit hook entries to settings.local.json
+[2026-02-17 18:56:55] Reworked graphStore addNode and addEdge for radial mindmap layout with center-outward positioning
+[2026-02-17 18:57:22] Replaced left-to-right flow force with radial spread physics for circular mindmap layout
+[2026-02-17 18:57:43] Replaced rightward-panning auto-camera with zoom-to-fit for radial mindmap layout
